@@ -1,0 +1,7 @@
+.flash-message-leave {
+    transition: opacity 500ms ease-in;
+}
+
+.flash-message-leave.flash-message-leave-active {
+    opacity: 0;
+}

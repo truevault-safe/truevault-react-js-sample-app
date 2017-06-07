@@ -1,0 +1,41 @@
+@import "../style-vars.scss";
+
+.doctor-response-times {
+  float: left;
+  border-left: 2px solid $separator-color;
+  padding-left: 30px;
+
+  ul {
+    padding-left: 15px;
+    margin-top: 30px;
+    list-style: none;
+
+    li {
+      clear: both;
+
+      & > div {
+        float: left;
+      }
+    }
+
+    .doctor-name {
+      width: 120px;
+      font-size: 15px;
+      color: $deemphasized-text-color;
+    }
+
+    .progress {
+      width: 230px;
+
+      .progress-bar {
+        background-image: linear-gradient(95deg, #374c89, #7b3d7e);
+      }
+    }
+
+    .response-time {
+      width: 65px;
+      text-align: right;
+      color: $highlight-color;
+    }
+  }
+}

@@ -1,0 +1,58 @@
+@import "../style-vars.scss";
+
+form.new-case-form {
+  width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+
+  legend {
+    border: none;
+    color: $emphasized-text-color;
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 70px;
+  }
+
+  .patient-height {
+    width: 50%;
+    float: left;
+    margin-right: 10px;
+  }
+
+  .patient-weight {
+    .input-group-addon {
+      padding-right: 0;
+    }
+  }
+
+  .progress-box {
+    height: 90px;
+    border: dashed 1px #c1ccd5;
+    text-align: center;
+    padding: 36px;
+
+    a {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .progress {
+      height: 4px;
+      margin: 7px;
+      border-radius: 100px;
+
+      .progress-bar {
+        background-image: linear-gradient(95deg, #374c89, #7b3d7e);
+      }
+    }
+  }
+
+  .thumbnail-col {
+    margin-bottom: 25px;
+  }
+
+  .submit-buttons {
+    margin-top: 70px;
+    padding-bottom: 70px;
+  }
+}
