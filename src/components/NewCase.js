@@ -32,7 +32,7 @@ class NewCase extends Component {
         e.preventDefault();
 
         this.props.createCase(
-            this.props.accessToken,
+            this.props.tvClient,
             this.caseId.value,
             this.patientName.value,
             this.sex.value,
@@ -181,7 +181,7 @@ const mapStateToProps = state => {
         addCaseError: state.addCase.addCaseError,
         bytesLoaded: state.addCase.bytesLoaded,
         bytesTotal: state.addCase.bytesTotal,
-        accessToken: state.login.user.access_token
+        tvClient: state.login.tvClient
     };
 };
 

@@ -5502,6 +5502,10 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
+tv-js-sdk@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/tv-js-sdk/-/tv-js-sdk-0.1.0.tgz#a14996bd3b997f966d59cde08762771515534674"
+
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"

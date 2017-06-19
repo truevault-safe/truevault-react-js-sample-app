@@ -3,7 +3,7 @@ const commandLineArgs = require('command-line-args');
 const getUsage = require('command-line-usage');
 const randomString = require('randomstring');
 const fs = require('fs');
-const tv = require('../src/tv.js');
+const TrueVaultClient = require('tv-js-sdk');
 const apiHelpers = require('../src/api-helpers.js');
 const dateFormat = require('dateFormat');
 const GroupPolicyBuilder = require('../src/group-policy');
@@ -134,37 +134,37 @@ async function createSendgridApprovedTemplate(sendgridAPIKey, clientURL) {
     return createSendgridTemplate(sendgridAPIKey, templateName, templateBody);
 }
 
-async function createCasesVault(accessToken) {
+async function createCasesVault(tvClient) {
     const casesVaultName = `truediagnostics-cases-${nameNoise()}`;
-    const response = await tv.createVault(accessToken, casesVaultName);
+    const response = await tvClient.createVault(casesVaultName);
     console.log(chalk.green(`Created vault ${chalk.bold(casesVaultName)} with id ${chalk.bold(response.vault.id)}`));
     return response.vault.id;
 }
 
-async function createAdminUser(accessToken, password) {
+async function createAdminUser(tvClient, password) {
     const adminUserName = `truediagnostics-admin-${nameNoise()}`;
-    const user = await tv.createUser(accessToken, adminUserName, password, {role: 'admin', name: 'Alex Administrator'});
+    const user = await tvClient.createUser(adminUserName, password, {role: 'admin', name: 'Alex Administrator'});
     const adminUserId = user.user_id;
     console.log(chalk.green(`Created admin user ${chalk.bold(adminUserName)}:${password} with id ${chalk.bold(adminUserId)}`));
     return adminUserId;
 }
 
-async function createDoctorUser(accessToken, lastName, password) {
+async function createDoctorUser(tvClient, lastName, password) {
     const doctorUserName = `truediagnostics-dr-${lastName.toLowerCase()}-${nameNoise()}`;
     const doctorFullName = `Dr. ${lastName}`;
-    const user = await tv.createUser(accessToken, doctorUserName, password, {role: 'doctor', name: doctorFullName});
+    const user = await tvClient.createUser(doctorUserName, password, {role: 'doctor', name: doctorFullName});
     const doctorUserId = user.user_id;
     console.log(chalk.green(`Created doctor user ${chalk.bold(doctorFullName)} (${doctorUserName}:${password}) with id ${chalk.bold(doctorUserId)}`));
     return doctorUserId;
 }
 
-async function createDoctorUsers(accessToken, password) {
+async function createDoctorUsers(tvClient, password) {
     const doctorNames = ['Johnson', 'Blackwell', 'Baker', 'Smith'];
-    const createDoctorPromises = doctorNames.map(name => createDoctorUser(accessToken, name, password));
+    const createDoctorPromises = doctorNames.map(name => createDoctorUser(tvClient, name, password));
     return await Promise.all(createDoctorPromises);
 }
 
-async function createAdminsGroup(accessToken, adminUserId, casesVaultId) {
+async function createAdminsGroup(tvClient, adminUserId, casesVaultId) {
     const adminsGroupName = `truediagnostics-admins-${nameNoise()}`;
     const adminPolicy =  new GroupPolicyBuilder()
         // Create documents, BLOBs, and groups
@@ -188,12 +188,12 @@ async function createAdminsGroup(accessToken, adminUserId, casesVaultId) {
         .create(`Group::.*::GroupMembership::.*`)
         .build();
 
-    const group = await tv.createGroup(accessToken, adminsGroupName, adminPolicy, [adminUserId]);
+    const group = await tvClient.createGroup(adminsGroupName, adminPolicy, [adminUserId]);
     console.log(chalk.green(`Created admins group ${chalk.bold(adminsGroupName)} with id ${chalk.bold(group.id)}`));
     return group.id;
 }
 
-async function createDoctorsGroup(accessToken, userIds) {
+async function createDoctorsGroup(tvClient, userIds) {
     const doctorsGroupName = `truediagnostics-doctors-${nameNoise()}`;
 
     const doctorPolicy = new GroupPolicyBuilder()
@@ -203,12 +203,12 @@ async function createDoctorsGroup(accessToken, userIds) {
         .create('User::.*::Message')
         .build();
 
-    const group = await tv.createGroup(accessToken, doctorsGroupName, doctorPolicy, userIds);
+    const group = await tvClient.createGroup(doctorsGroupName, doctorPolicy, userIds);
     console.log(chalk.green(`Created doctors group ${chalk.bold(doctorsGroupName)} with id ${chalk.bold(group.id)}`));
     return group.id;
 }
 
-async function createPatientsGroup(accessToken) {
+async function createPatientsGroup(tvClient) {
     const patientsGroupName = `truediagnostics-patients-${nameNoise()}`;
 
     const patientsPolicy = new GroupPolicyBuilder()
@@ -217,20 +217,20 @@ async function createPatientsGroup(accessToken) {
         .update('User::$[id=self.id]')
         .build();
 
-    const group = await tv.createGroup(accessToken, patientsGroupName, patientsPolicy);
+    const group = await tvClient.createGroup(patientsGroupName, patientsPolicy);
     const patientsGroupId = group.id;
     console.log(chalk.green(`Created patients group ${chalk.bold(patientsGroupName)} with id ${chalk.bold(patientsGroupId)}`));
     return patientsGroupId;
 }
 
-async function createCasesSchema(accessToken, casesVaultId) {
+async function createCasesSchema(tvClient, casesVaultId) {
     const casesSchemaName = `truediagnostics-cases-${nameNoise()}`;
     const fields = [
         {index: true, name: 'caseId', type: 'string'},
         {index: true, name: 'patientName', type: 'string'},
         {index: true, name: 'dueDate', type: 'date'},
     ];
-    const response = await tv.createSchema(accessToken, casesVaultId, casesSchemaName, fields);
+    const response = await tvClient.createSchema(casesVaultId, casesSchemaName, fields);
     console.log(chalk.green(`Created cases schema with id ${chalk.bold(response.schema.id)}`));
     return response.schema.id;
 }
@@ -239,7 +239,7 @@ function randomDateInRange(start, end) {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
-async function createDummyCases(accessToken, vaultId, schemaId, doctorUserIds) {
+async function createDummyCases(tvClient, vaultId, schemaId, doctorUserIds) {
     const generateDummyData = options['generate-dummy-data'];
     if (!generateDummyData) {
         return;
@@ -311,16 +311,17 @@ async function createDummyCases(accessToken, vaultId, schemaId, doctorUserIds) {
         const caseFiles = caseImagePaths.map(
             casePath => fs.createReadStream(`${dataPath}/${casePath}`));
         const createBlobPromises = caseFiles.map(
-            caseFile => tv.createBlob(accessToken, vaultId, caseFile));
+            caseFile => tvClient.createBlob(vaultId, caseFile));
 
-        await apiHelpers.createCase(internalCaseCreator, accessToken, vaultId, schemaId,
+        await apiHelpers.createCase(internalCaseCreator, tvClient, vaultId, schemaId,
             createBlobPromises, caseId, patientName, sex, dob, patientHeight, patientWeight,
             dueDate, approverUserId, reviewerUserId);
         console.log(chalk.green(`Created case ${chalk.bold(caseId)}`));
     };
 
-    const createInternalCaseWithRandomTimes = async (accessToken, caseDocId, diagnosisDocId,
+    const createInternalCaseWithRandomTimes = async (tvAccessToken, caseDocId, diagnosisDocId,
                                                      approverId, reviewerId, readGroupId, vaultId) => {
+        const tvClient = new TrueVaultClient(tvAccessToken);
         const caseCreatedAtDate = randomDateInRange(getTodaysDatePlusDays(-3), today);
         const caseCreatedAtStr = caseCreatedAtDate.toISOString();
         await insertCaseRow(caseDocId, diagnosisDocId, approverId, reviewerId, readGroupId,
@@ -333,7 +334,7 @@ async function createDummyCases(accessToken, vaultId, schemaId, doctorUserIds) {
             const caseReviewDocument = new DiagnosisDocument(summary, description);
             await Promise.all([
                 reviewCaseRow(caseDocId, caseReviewedAtStr),
-                tv.updateDocument(accessToken, vaultId, diagnosisDocId, caseReviewDocument)
+                tvClient.updateDocument(vaultId, diagnosisDocId, caseReviewDocument)
             ]);
 
             // 50% chance a reviewed case will be approved
@@ -347,8 +348,9 @@ async function createDummyCases(accessToken, vaultId, schemaId, doctorUserIds) {
 
     // Create at least one case per doctor that is approved for cosmetic purposes when viewing the
     // admin dashboard
-    const createApprovedInternalCase = async (accessToken, caseDocId, diagnosisDocId,
+    const createApprovedInternalCase = async (tvAccessToken, caseDocId, diagnosisDocId,
                                               approverId, reviewerId, readGroupId, vaultId) => {
+        const tvClient = new TrueVaultClient(tvAccessToken);
         const caseCreatedAtDate = randomDateInRange(getTodaysDatePlusDays(-3), today);
         const caseCreatedAtStr = caseCreatedAtDate.toISOString();
         await insertCaseRow(caseDocId, diagnosisDocId, approverId, reviewerId, readGroupId,
@@ -359,7 +361,7 @@ async function createDummyCases(accessToken, vaultId, schemaId, doctorUserIds) {
         const caseReviewDocument = new DiagnosisDocument(summary, description);
         await Promise.all([
             reviewCaseRow(caseDocId, caseReviewedAtStr),
-            tv.updateDocument(accessToken, vaultId, diagnosisDocId, caseReviewDocument)
+            tvClient.updateDocument(vaultId, diagnosisDocId, caseReviewDocument)
         ]);
 
         const caseApprovedAtDate = randomDateInRange(caseReviewedAtDate, today);
@@ -418,19 +420,20 @@ SENDGRID_APPROVED_TEMPLATE_ID=${sendgridApprovedTemplateId}
 async function runSetup () {
     try {
         const adminApiKey = options['admin-api-key'];
+        const adminTvClient = new TrueVaultClient(adminApiKey);
         const password = options['password'] || 'asdf';
-        const vaultId = await createCasesVault(adminApiKey);
-        const schemaId = await createCasesSchema(adminApiKey, vaultId);
+        const vaultId = await createCasesVault(adminTvClient);
+        const schemaId = await createCasesSchema(adminTvClient, vaultId);
         const sendgridAPIKey = options['sendgrid-api-key'];
         const clientURL = options['client-url'] || 'http://localhost:3000';
         const sendgridInvitePatientTemplateId = await createSendgridInvitePatientTemplate(sendgridAPIKey, clientURL);
         const sendgridApprovedTemplateId = await createSendgridApprovedTemplate(sendgridAPIKey, clientURL);
-        const adminUserId = await createAdminUser(adminApiKey, password);
-        const doctorUserIds = await createDoctorUsers(adminApiKey, password);
-        const patientsGroupId = await createPatientsGroup(adminApiKey, vaultId);
-        await createAdminsGroup(adminApiKey, adminUserId, vaultId);
-        await createDoctorsGroup(adminApiKey, doctorUserIds);
-        await createDummyCases(adminApiKey, vaultId, schemaId, doctorUserIds);
+        const adminUserId = await createAdminUser(adminTvClient, password);
+        const doctorUserIds = await createDoctorUsers(adminTvClient, password);
+        const patientsGroupId = await createPatientsGroup(adminTvClient, vaultId);
+        await createAdminsGroup(adminTvClient, adminUserId, vaultId);
+        await createDoctorsGroup(adminTvClient, doctorUserIds);
+        await createDummyCases(adminTvClient, vaultId, schemaId, doctorUserIds);
         generateDotEnv(options['account-id'], vaultId, schemaId, sendgridAPIKey, sendgridInvitePatientTemplateId, sendgridApprovedTemplateId, patientsGroupId);
         return process.exit(0);
     } catch (e) {

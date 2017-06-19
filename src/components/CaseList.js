@@ -30,7 +30,7 @@ class CaseList extends Component {
     }
 
     componentWillMount() {
-        this.changeListPage(1)
+        this.changeListPage(1);
     }
 
     changeListPage(page) {
@@ -57,7 +57,7 @@ class CaseList extends Component {
             sort.push(sortObj);
         }
 
-        this.props.listCases(this.props.accessToken, 'and', filter, sort, page, 10);
+        this.props.listCases(this.props.tvClient, 'and', filter, sort, page, 10);
     }
 
     toggleSortDirection(key) {
@@ -85,7 +85,7 @@ class CaseList extends Component {
     dueBeforeChange(event) {
         this.setState({
             dueBefore: event.target.value || null
-        }, () => this.changeListPage(this.props.paginationInfo.current_page))
+        }, () => this.changeListPage(this.props.paginationInfo.current_page));
     }
 
     tableHeader(sortKey, label) {
@@ -144,7 +144,7 @@ class CaseList extends Component {
                                 <td>
                                     {!c.patientUserId && <InvitePatientOverlay caseDocument={c}/>}
                                 </td>
-                            </tr>
+                            </tr>;
                         })
                     }
                     </tbody>
@@ -163,14 +163,14 @@ class CaseList extends Component {
                         onSelect={this.changeListPage.bind(this)}/>
                 </div>
             </div>
-        </div>
+        </div>;
     }
 }
 
 const mapStateToProps = state => {
     return {
         isDoctor: state.login.user.attributes.role === 'doctor',
-        accessToken: state.login.user.access_token,
+        tvClient: state.login.tvClient,
         cases: state.caseList.cases,
         casesLoading: state.caseList.loading,
         paginationInfo: state.caseList.paginationInfo,

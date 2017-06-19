@@ -30,7 +30,7 @@ class AdminDashboard extends Component {
 
 const mapStateToProps = (state) => {
     return {
-        accessToken: state.login.user.access_token,
+        accessToken: state.login.tvClient.apiKeyOrAccessToken,
         stats: state.statsView.stats,
         statsLoading: state.statsView.loading,
         statsError: state.statsView.error

@@ -1,14 +1,15 @@
 /**
- * TrueDiagnostics stores PII in TrueVault, and non-PII with this NodeJS server. This file holds the bulk of the
- * NodeJS application code, and all "internal API" endpoints.
- * This is included in our Sample App to show how you can store non-PII data anyway you want when using TrueVault. The
- * majority of the endpoints here do not interact with TrueVault, because the client-side code communicates directly
- * with TrueVault. The notable exception is email sending. Search this file for 'email' to see how you TrueVault can
- * help you send event-driven emails to your customers without storing their email (PII) on your server.
+ * TrueDiagnostics stores PII in TrueVault, and non-PII with this NodeJS server. This file holds
+ * the bulk of the NodeJS application code, and all "internal API" endpoints. This is included in
+ * our Sample App to show how you can store non-PII data anyway you want when using TrueVault. The
+ * majority of the endpoints here do not interact with TrueVault, because the client-side code
+ * communicates directly with TrueVault. The notable exception is email sending. Search this file
+ * for 'email' to see how you TrueVault can help you send event-driven emails to your customers
+ * without storing their email (PII) on your server.
  *
- * If you're reviewing the Sample App to better understand how to integrate with TrueVault, you don't need to look
- * closely at this server component. In your application, this piece will be all your custom code and will necessarily
- * be quite different.
+ * If you're reviewing the Sample App to better understand how to integrate with TrueVault, you
+ * don't need to look closely at this server component. In your application, this piece will be all
+ * your custom code and will necessarily be quite different.
  */
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -16,7 +17,7 @@ const morgan = require('morgan');
 const chalk = require('chalk');
 const app = express();
 require('dotenv').config({path: '../.env'});
-const tv = require('../src/tv.js');
+const TrueVaultClient = require('tv-js-sdk');
 const {db, insertCaseRow, reviewCaseRow, approveCaseRow} = require('./db');
 // eslint-disable-next-line no-native-reassign
 fetch = require('node-fetch');
@@ -38,23 +39,30 @@ app.use(morgan('combined'));
 app.use(express.static('public'));
 app.use(bodyParser.json());
 
-function validateRoleMiddleware(...requiredRoles) {
-    return (req, res, next) => {
+/**
+ * Reads the TrueVault user belonging to the provided access token and validates whether the user is
+ * allowed to make a request based on their role (e.g. admin, doctor, patient).
+ *
+ * @param authorizedRoles List of roles that are authorized to make the request. If the role of the
+ *          user matches any of the roles in this list, the request is permitted.
+ */
+function validateRoleMiddleware(...authorizedRoles) {
+    return async (req, res, next) => {
         const accessToken = req.headers['x-tv-access-token'];
-        req.tvAccessToken = accessToken;
-        tv.readCurrentUser(accessToken)
-            .then(user => {
-                const role = user.attributes.role;
-                if (requiredRoles.includes(role)) {
-                    req.user = user;
-                    next();
-                } else {
-                    res.status(403).send(`Role not authorized: ${role}`);
-                }
-            })
-            .catch(error => {
-                return res.status(401).send(error);
-            });
+        const tvClient = new TrueVaultClient(accessToken);
+        req.tvClient = tvClient;
+        try {
+            const user = await tvClient.readCurrentUser();
+            const role = user.attributes.role;
+            if (authorizedRoles.includes(role)) {
+                req.user = user;
+                next();
+            } else {
+                res.status(403).send(`Role not authorized: ${role}`);
+            }
+        } catch(error) {
+            res.status(401).send(error);
+        }
     };
 }
 
@@ -142,7 +150,9 @@ app.post('/api/case/id/:caseDocId/approve', validateRoleMiddleware('doctor'), as
             // server to fall under the purview of HIPAA, so we cannot handle PII (email).
             // Given the User's ID, TrueVault will lookup the user's email address as specified, and call SendGrid on
             // your behalf.
-            await tv.sendEmailSendgrid(req.tvAccessToken, SENDGRID_API_KEY, recipientUserId, SENDGRID_APPROVED_TEMPLATE_ID, {literal_value: "sample-app@truevault.com"}, {user_attribute: "email"}, substitutions);
+            await req.tvClient.sendEmailSendgrid(SENDGRID_API_KEY, recipientUserId,
+                SENDGRID_APPROVED_TEMPLATE_ID, {literal_value: "sample-app@truevault.com"},
+                {user_attribute: "email"}, substitutions);
         }
 
         await approveCaseRow(req.params.caseDocId);
@@ -163,7 +173,9 @@ app.post('/api/case/id/:caseDocId/patient', validateRoleMiddleware('admin'), asy
             "{{api_key}}": {literal_value: req.body.patientUserApiKey}
         };
         console.log(`Sending email to user id ${recipientUserId} with substitutions ${JSON.stringify(substitutions, null, 2)}`);
-        await tv.sendEmailSendgrid(req.tvAccessToken, SENDGRID_API_KEY, recipientUserId, SENDGRID_INVITE_PATIENT_TEMPLATE_ID, {literal_value: "sample-app@truevault.com"}, {user_attribute: "email"}, substitutions);
+        await req.tvClient.sendEmailSendgrid(SENDGRID_API_KEY, recipientUserId,
+            SENDGRID_INVITE_PATIENT_TEMPLATE_ID, {literal_value: "sample-app@truevault.com"},
+            {user_attribute: "email"}, substitutions);
 
         res.sendStatus(200);
     } catch (e) {

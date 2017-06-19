@@ -10,9 +10,9 @@ import CaseStatus from "./CaseStatus";
 
 class PatientDashboard extends Component {
     async componentWillMount() {
-        const caseMetadataRequest = internalApiClient.getPatientCase(this.props.accessToken);
+        const caseMetadataRequest = internalApiClient.getPatientCase(this.props.tvClient.apiKeyOrAccessToken);
 
-        this.props.viewCase(this.props.accessToken, caseMetadataRequest);
+        this.props.viewCase(this.props.tvClient, caseMetadataRequest);
     }
 
     render() {
@@ -36,7 +36,7 @@ class PatientDashboard extends Component {
                 <Row>
                     <Col md={12}>
                         <BlobCarousel style={{width: '100%'}}
-                                      accessToken={this.props.accessToken}
+                                      tvClient={this.props.tvClient}
                                       imageIds={this.props.caseData.caseImageIds || []}
                                       vaultId={process.env.REACT_APP_CASES_VAULT_ID}/>
                     </Col>
@@ -73,7 +73,7 @@ class PatientDashboard extends Component {
 
 const mapStateToProps = state => {
     return {
-        accessToken: state.login.user.access_token,
+        tvClient: state.login.tvClient,
         loading: state.caseView.loading,
         error: state.caseView.error,
         caseData: state.caseView.caseData,

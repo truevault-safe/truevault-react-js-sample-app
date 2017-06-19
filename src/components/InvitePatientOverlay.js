@@ -16,7 +16,7 @@ class InvitePatientOverlay extends Component {
         e.preventDefault();
 
         const patientEmail = e.target.email.value;
-        this.props.assignCaseToNewPatient(this.props.accessToken, this.props.caseDocument.documentId, this.props.caseDocument.readGroupId, patientEmail, this.props.caseDocument.patientName, this.hide.bind(this));
+        this.props.assignCaseToNewPatient(this.props.tvClient, this.props.caseDocument.documentId, this.props.caseDocument.readGroupId, patientEmail, this.props.caseDocument.patientName, this.hide.bind(this));
     }
 
     hide() {
@@ -58,7 +58,7 @@ class InvitePatientOverlay extends Component {
 
 const mapStateToProps = state => {
     return {
-        accessToken: state.login.user.access_token,
+        tvClient: state.login.tvClient,
         assignCaseInProgress: state.assignCaseToNewPatient.loading,
         assignCaseError: state.assignCaseToNewPatient.error
     };

@@ -9,7 +9,7 @@ import CaseStatus from "./CaseStatus";
 
 class DoctorInbox extends Component {
     componentWillMount() {
-        return this.props.doctorInboxLoad(this.props.accessToken, this.props.doctorUserId);
+        return this.props.doctorInboxLoad(this.props.tvClient, this.props.doctorUserId);
     }
 
     caseTile(c) {
@@ -79,7 +79,7 @@ class DoctorInbox extends Component {
 
 const mapStateToProps = state => {
     return {
-        accessToken: state.login.user.access_token,
+        tvClient: state.login.tvClient,
         doctorUserId: state.login.user.id,
         loading: state.doctorInbox.loading,
         error: state.doctorInbox.error,

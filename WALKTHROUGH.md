@@ -122,7 +122,7 @@ This view is where the reviewer doctor can submit a diagnosis for a case. It sho
 
 Enter text in the Summary and Description fields and click **Submit Diagnosis** to submit a review. You will be taken back to the "My Cases" screen where you will no longer see the case you just reviewed.
 
-Click logout when you are finished.
+Click the **Logout** button in the top navigation bar when you are finished.
 
 <img src="ReviewCase.png">
 

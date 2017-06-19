@@ -19,7 +19,7 @@ export const doctorInbox = handleActions({
             error: null,
             casesToApprove: null,
             casesToReview: null
-        })
+        });
     },
     DOCTOR_INBOX_LOAD_ERROR: (state, action) => {
         return Object.assign({}, state, {
@@ -27,7 +27,7 @@ export const doctorInbox = handleActions({
             error: action.payload,
             casesToApprove: null,
             casesToReview: null
-        })
+        });
     },
     DOCTOR_INBOX_LOAD_SUCCESS: (state, action) => {
         return Object.assign({}, state, {
@@ -125,7 +125,7 @@ export const caseView = handleActions({
             diagnosisDocId: action.payload.diagnosisDocId,
             loading: false,
             error: null
-        }
+        };
     }
 }, {});
 
@@ -146,7 +146,7 @@ export const caseSubmitReview = handleActions({
         return {
             loading: false,
             error: null
-        }
+        };
     }
 }, {});
 
@@ -167,7 +167,7 @@ export const caseSubmitApproval = handleActions({
         return {
             loading: false,
             error: null
-        }
+        };
     }
 }, {});
 
@@ -228,7 +228,7 @@ export const assignCaseToNewPatient = handleActions({
         return {
             loading: false,
             error: null
-        }
+        };
     }
 }, {loading: false, error: null});
 
@@ -237,11 +237,12 @@ export const login = handleActions({
         return Object.assign({}, state, {
             loggingIn: true,
             loginError: null,
-        })
+        });
     },
     LOGIN_FAILURE: (state, action) => {
         return Object.assign({}, state, {
             loggingIn: false,
+            tvClient: null,
             user: null,
             loginError: action.payload,
             mfaRequired: action.payload.error && action.payload.error.type === 'USER.MFA_CODE_REQUIRED'
@@ -250,13 +251,15 @@ export const login = handleActions({
     LOGIN_SUCCESS: (state, action) => {
         return Object.assign({}, state, {
             loggingIn: false,
-            user: action.payload,
+            tvClient: action.payload.tvClient,
+            user: action.payload.user,
             loginError: null,
             mfaRequired: false
         });
     },
     LOGOUT: state => {
         return Object.assign({}, state, {
+            tvClient: null,
             user: null,
             mfaRequired: false
         });
@@ -265,7 +268,7 @@ export const login = handleActions({
 
 export const flash = handleActions({
     DISPLAY_FLASH_MESSAGE: (state, action) => {
-        return [action.payload, ...state]
+        return [action.payload, ...state];
     },
     REMOVE_FLASH_MESSAGE: (state, action) => {
         return state.filter(flash => flash.key === action.payload);
@@ -277,18 +280,18 @@ export const patientSignup = handleActions({
         return {
             loading: true,
             error: null
-        }
+        };
     },
     PATIENT_SIGNUP_ERROR: (state, action) => {
         return {
             loading: false,
             error: action.payload
-        }
+        };
     },
     LOGIN_SUCCESS: () => {
         return {
             loading: false,
             error: null
-        }
+        };
     }
 }, {loading: false, error: null});

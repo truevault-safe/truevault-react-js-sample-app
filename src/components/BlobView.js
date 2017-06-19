@@ -1,6 +1,5 @@
 import React, {Component} from "react";
 import Spinner from "react-spinner";
-import tv from "../tv";
 
 export default class BlobView extends Component {
     constructor(props) {
@@ -10,12 +9,12 @@ export default class BlobView extends Component {
     }
 
     async componentDidMount() {
-        const blob = await tv.getBlob(this.props.accessToken, this.props.vaultId, this.props.blobId);
+        const blob = await this.props.tvClient.getBlob(this.props.vaultId, this.props.blobId);
         this.setState({loading: false, blobObjectUrl: URL.createObjectURL(blob)});
     }
 
     render() {
-        return this.state.loading ? <Spinner/> : <img alt="Blob" src={this.state.blobObjectUrl}/>
+        return this.state.loading ? <Spinner/> : <img alt="Blob" src={this.state.blobObjectUrl}/>;
     }
 }
 
