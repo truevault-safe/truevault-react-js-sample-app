@@ -1,11 +1,10 @@
-const tv = require('./tv.js');
 const GroupPolicyBuilder = require('./group-policy');
 const CaseDocument = require('./case-document.js');
 
 /**
  * Creates a TrueVault Group that grants its members Read-only access to the case data, including the main case
  * document, the secondary "diagnosis" document, and all associated images.
- * @param accessToken For TrueVault authentication
+ * @param tvClient TrueVaultClient
  * @param vaultId The Vault where cases are stored
  * @param documentId The id for the primary document for the case
  * @param diagnosisDocId The id for the diagnosis doc, the secondary document for the diagnosis data
@@ -15,7 +14,7 @@ const CaseDocument = require('./case-document.js');
  *          read access. Note: this reviewer will also need access to Update the diagnosis doc, see #createReviewerGroup
  * @returns {Promise.<*|Promise>}
  */
-async function createReadGroup(accessToken, vaultId, documentId, diagnosisDocId,
+async function createReadGroup(tvClient, vaultId, documentId, diagnosisDocId,
                                blobIds, approverId, reviewerId) {
     const blobResources = [...blobIds].map(id => {
         return `Vault::${vaultId}::Blob::${id}`;
@@ -25,14 +24,13 @@ async function createReadGroup(accessToken, vaultId, documentId, diagnosisDocId,
         .read(`Vault::${vaultId}::Document::${diagnosisDocId}`)
         .read(...blobResources)
         .build();
-    return tv.createGroup(accessToken, `case-${documentId}-read`, readGroupPolicy,
-        [approverId, reviewerId]);
+    return tvClient.createGroup(`case-${documentId}-read`, readGroupPolicy, [approverId, reviewerId]);
 }
 
 /**
  * Creates a TrueVault Group that grants its members update-access to the diagnosis document. This group should only
  * ever contain the reviewer in normal usage, since the approver can only approve the reviewer's diagnosis, not update the diagnosis.
- * @param accessToken For TrueVault authentication
+ * @param tvClient TrueVaultClient
  * @param documentId The id for the primary document for the case (in this method, only used for group naming)
  * @param diagnosisDocId The id for the diagnosis doc, the secondary document for the diagnosis data. This method
  *             gives the reviewer user update permission to this document.
@@ -41,13 +39,12 @@ async function createReadGroup(accessToken, vaultId, documentId, diagnosisDocId,
  *          is why the diagnosis document is a separate TrueVault resource.
  * @returns {Promise.<*|Promise>}
  */
-async function createReviewerGroup(accessToken, vaultId, documentId, diagnosisDocId, reviewerId) {
+async function createReviewerGroup(tvClient, vaultId, documentId, diagnosisDocId, reviewerId) {
     // Only the reviewer can update the diagnosis document
     const reviewerGroupPolicy = new GroupPolicyBuilder()
         .update(`Vault::${vaultId}::Document::${diagnosisDocId}`)
         .build();
-    return tv.createGroup(accessToken, `case-${documentId}-reviewer`,
-        reviewerGroupPolicy, [reviewerId]);
+    return tvClient.createGroup(`case-${documentId}-reviewer`, reviewerGroupPolicy, [reviewerId]);
 }
 
 /**
@@ -67,7 +64,7 @@ async function createReviewerGroup(accessToken, vaultId, documentId, diagnosisDo
  * setup script's case, this interacts with the database directly to create scenarios that are not
  * possible to express using the public API. In the UI's case, it will call the API via HTTP.
  */
-async function createCase(internalCaseCreator, accessToken, vaultId, schemaId, createBlobPromises,
+async function createCase(internalCaseCreator, tvClient, vaultId, schemaId, createBlobPromises,
                           caseId, patientName, sex, dob, patientHeight, patientWeight, dueDate,
                           approverId, reviewerId) {
     if (reviewerId === approverId) {
@@ -80,17 +77,17 @@ async function createCase(internalCaseCreator, accessToken, vaultId, schemaId, c
         patientWeight, dueDate, caseImageIds);
 
     const [caseDocResponse, diagnosisDocResponse] = await Promise.all([
-        tv.createDocument(accessToken, vaultId, schemaId, caseDocument),
-        tv.createDocument(accessToken, vaultId, null, {})
+        tvClient.createDocument(vaultId, schemaId, caseDocument),
+        tvClient.createDocument(vaultId, null, {})
     ]);
     const caseDocId = caseDocResponse.document.id;
     const diagnosisDocId = diagnosisDocResponse.document.id;
 
-    const readGroup = await createReadGroup(accessToken, vaultId, caseDocId, diagnosisDocId, caseImageIds, approverId, reviewerId);
+    const readGroup = await createReadGroup(tvClient, vaultId, caseDocId, diagnosisDocId, caseImageIds, approverId, reviewerId);
 
-    const createReviewerGroupRequest = createReviewerGroup(accessToken, vaultId, caseDocId, diagnosisDocId, reviewerId);
+    const createReviewerGroupRequest = createReviewerGroup(tvClient, vaultId, caseDocId, diagnosisDocId, reviewerId);
 
-    const createInternalCaseRequest = internalCaseCreator(accessToken, caseDocId,
+    const createInternalCaseRequest = internalCaseCreator(tvClient.apiKeyOrAccessToken, caseDocId,
         diagnosisDocId, approverId, reviewerId, readGroup.id, vaultId);
 
     await Promise.all([createReviewerGroupRequest, createInternalCaseRequest]);

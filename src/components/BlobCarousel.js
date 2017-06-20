@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import {Carousel} from "react-bootstrap";
 import BlobView from "./BlobView";
 import "./BlobCarousel.scss";
+import TrueVaultClient from "tv-js-sdk";
 
 class BlobCarousel extends Component {
     render() {
@@ -10,7 +11,7 @@ class BlobCarousel extends Component {
             <Carousel interval={null} style={this.props.style}>
                 {this.props.imageIds.map(caseImageId => {
                     return <Carousel.Item key={caseImageId}>
-                        <BlobView blobId={caseImageId} accessToken={this.props.accessToken}
+                        <BlobView blobId={caseImageId} tvClient={this.props.tvClient}
                                   vaultId={this.props.vaultId}/>
                     </Carousel.Item>;
                 })}
@@ -20,7 +21,7 @@ class BlobCarousel extends Component {
 }
 
 BlobCarousel.propTypes = {
-    accessToken: PropTypes.string.isRequired,
+    tvClient: PropTypes.instanceOf(TrueVaultClient).isRequired,
     imageIds: PropTypes.arrayOf(PropTypes.string).isRequired,
     vaultId: PropTypes.string.isRequired,
     style: PropTypes.object

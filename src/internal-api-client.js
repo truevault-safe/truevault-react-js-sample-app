@@ -6,7 +6,7 @@
 class InternalApiClient {
 
     constructor(urlPrefix) {
-        this.urlPrefix = urlPrefix
+        this.urlPrefix = urlPrefix;
     }
 
     headers(tvAccessToken) {

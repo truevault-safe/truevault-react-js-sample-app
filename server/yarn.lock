@@ -525,6 +525,10 @@ through@2:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
 
+tv-js-sdk@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/tv-js-sdk/-/tv-js-sdk-0.1.0.tgz#a14996bd3b997f966d59cde08762771515534674"
+
 type-is@~1.6.14:
   version "1.6.15"
   resolved "https://registry.yarnpkg.com/type-is/-/type-is-1.6.15.tgz#cab10fb4909e441c82842eafe1ad646c81804410"

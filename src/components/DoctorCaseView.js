@@ -11,22 +11,22 @@ import CaseStatus from "./CaseStatus";
 
 class DoctorCaseView extends Component {
     componentWillMount() {
-        const getCaseMetadataRequest = internalApiClient.getCase(this.props.accessToken, this.props.routeParams.caseId);
+        const getCaseMetadataRequest = internalApiClient.getCase(this.props.tvClient.apiKeyOrAccessToken, this.props.routeParams.caseId);
 
-        this.props.viewCase(this.props.accessToken, getCaseMetadataRequest);
+        this.props.viewCase(this.props.tvClient, getCaseMetadataRequest);
     }
 
     submitReview(e) {
         e.preventDefault();
 
-        this.props.submitReview(this.props.accessToken, this.props.routeParams.caseId,
+        this.props.submitReview(this.props.tvClient, this.props.routeParams.caseId,
             this.props.diagnosisDocId, this.summary.value, this.description.value);
     }
 
     submitApproval(e) {
         e.preventDefault();
 
-        this.props.submitApproval(this.props.accessToken, this.props.routeParams.caseId);
+        this.props.submitApproval(this.props.tvClient.apiKeyOrAccessToken, this.props.routeParams.caseId);
     }
 
     caseUpdateForm(submitFunction, submitting, formDisabled, buttonLabel) {
@@ -76,7 +76,7 @@ class DoctorCaseView extends Component {
             {this.props.caseData && this.props.caseMetadata && <div className="dr-case-view-container">
                 <Row>
                     <Col md={8}>
-                        <BlobCarousel accessToken={this.props.accessToken}
+                        <BlobCarousel tvClient={this.props.tvClient}
                                       imageIds={this.props.caseData.caseImageIds || []}
                                       vaultId={process.env.REACT_APP_CASES_VAULT_ID}/>
                     </Col>
@@ -123,7 +123,7 @@ class DoctorCaseView extends Component {
 
 const mapStateToProps = state => {
     return {
-        accessToken: state.login.user.access_token,
+        tvClient: state.login.tvClient,
         userId: state.login.user.id,
         loading: state.caseView.loading,
         caseViewError: state.caseView.error,

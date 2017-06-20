@@ -16,7 +16,7 @@ class PatientSignup extends Component {
                 <ControlLabel>Choose Password</ControlLabel>
                 <FormControl type="password" required/>
             </FormGroup>
-        </AuthForm>
+        </AuthForm>;
     }
 }
 

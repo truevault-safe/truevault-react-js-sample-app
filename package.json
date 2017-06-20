@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "tv-js-sdk": "^0.1.0",
     "bootstrap": "^3.3.7",
     "dateformat": "^2.0.0",
     "prop-types": "^15.5.10",
