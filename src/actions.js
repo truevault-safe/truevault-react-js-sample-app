@@ -12,7 +12,7 @@
  */
 import {createAction} from "redux-actions";
 import {push} from "react-router-redux";
-import TrueVaultClient from "tv-js-sdk";
+import TrueVaultClient from "truevault";
 import apiHelpers from "./api-helpers.js";
 import InternalApiClient from "../src/internal-api-client.js";
 import DiagnosisDocument from "./diagnosis-document.js";
