@@ -17,7 +17,7 @@ const morgan = require('morgan');
 const chalk = require('chalk');
 const app = express();
 require('dotenv').config({path: '../.env'});
-const TrueVaultClient = require('tv-js-sdk');
+const TrueVaultClient = require('truevault');
 const {db, insertCaseRow, reviewCaseRow, approveCaseRow} = require('./db');
 // eslint-disable-next-line no-native-reassign
 fetch = require('node-fetch');

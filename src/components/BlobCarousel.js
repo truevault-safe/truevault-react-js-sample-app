@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import {Carousel} from "react-bootstrap";
 import BlobView from "./BlobView";
 import "./BlobCarousel.scss";
-import TrueVaultClient from "tv-js-sdk";
+import TrueVaultClient from "truevault";
 
 class BlobCarousel extends Component {
     render() {

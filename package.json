@@ -4,7 +4,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "tv-js-sdk": "^0.1.0",
     "bootstrap": "^3.3.7",
     "dateformat": "^2.0.0",
     "prop-types": "^15.5.10",
@@ -22,7 +21,8 @@
     "redux-logger": "^3.0.1",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",
-    "sendgrid": "^5.1.0"
+    "sendgrid": "^5.1.0",
+    "truevault": "^0.2.0"
   },
   "devDependencies": {
     "autoprefixer": "6.7.2",
