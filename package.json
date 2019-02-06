@@ -55,7 +55,7 @@
     "fs-extra": "7.0.1",
     "html-webpack-plugin": "3.2.0",
     "http-proxy-middleware": "0.19.1",
-    "jest": "18.1.0",
+    "jest": "24.1.0",
     "json-loader": "0.5.7",
     "node-fetch": "^1.6.3",
     "node-sass": "^4.11.0",
