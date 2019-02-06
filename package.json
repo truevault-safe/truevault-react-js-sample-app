@@ -22,7 +22,7 @@
     "redux-promise": "^0.6.0",
     "redux-thunk": "^2.3.0",
     "sendgrid": "^5.2.3",
-    "truevault": "^0.2.0"
+    "truevault": "^1.3.0"
   },
   "devDependencies": {
     "autoprefixer": "9.4.7",
