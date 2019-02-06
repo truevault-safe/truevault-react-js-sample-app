@@ -57,7 +57,7 @@
     "http-proxy-middleware": "0.19.1",
     "jest": "24.1.0",
     "json-loader": "0.5.7",
-    "node-fetch": "^1.6.3",
+    "node-fetch": "^2.3.0",
     "node-sass": "^4.11.0",
     "object-assign": "4.1.1",
     "postcss-loader": "1.2.2",
