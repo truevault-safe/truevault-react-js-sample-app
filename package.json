@@ -50,7 +50,7 @@
     "eslint-plugin-jsx-a11y": "6.2.1",
     "eslint-plugin-react": "7.12.4",
     "extract-text-webpack-plugin": "1.0.1",
-    "file-loader": "0.10.0",
+    "file-loader": "3.0.1",
     "form-data": "^2.3.3",
     "fs-extra": "0.30.0",
     "html-webpack-plugin": "2.24.0",
