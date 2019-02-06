@@ -5,7 +5,7 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^3.3.7",
-    "dateformat": "^2.0.0",
+    "dateformat": "^3.0.3",
     "prop-types": "^15.6.2",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",
