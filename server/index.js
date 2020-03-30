@@ -49,7 +49,7 @@ app.use(bodyParser.json());
 function validateRoleMiddleware(...authorizedRoles) {
     return async (req, res, next) => {
         const accessToken = req.headers['x-tv-access-token'];
-        const tvClient = new TrueVaultClient(accessToken);
+        const tvClient = new TrueVaultClient({ accessToken });
         req.tvClient = tvClient;
         try {
             const user = await tvClient.readCurrentUser();

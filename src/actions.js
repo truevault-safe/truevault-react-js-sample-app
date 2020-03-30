@@ -468,7 +468,7 @@ export function patientSignup(userApiKey, newPassword) {
         try {
             dispatch(patientSignupStart());
 
-            const signupTvClient = new TrueVaultClient(userApiKey);
+            const signupTvClient = new TrueVaultClient({apiKey: userApiKey});
 
             // Load the user. This ensures the API key is valid, and determines the current user's ID
             const user = await signupTvClient.readCurrentUser();
@@ -478,7 +478,7 @@ export function patientSignup(userApiKey, newPassword) {
             // Store a TrueVaultClient with newly generated access token so that the user stays
             // logged in after the API key is invalidated
             const accessToken = await signupTvClient.createUserAccessToken(user.id);
-            const tvClient = new TrueVaultClient(accessToken);
+            const tvClient = new TrueVaultClient({ accessToken });
 
             // Generate a new API key to invalidate the API key sent in the email
             await signupTvClient.createUserApiKey(user.id);
