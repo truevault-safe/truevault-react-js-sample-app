@@ -71,7 +71,7 @@ async function createCase(internalCaseCreator, tvClient, vaultId, schemaId, crea
         throw Error("Approver and reviewer cannot be the same");
     }
     const createBlobResponses = await Promise.all(createBlobPromises);
-    const caseImageIds = createBlobResponses.map(response => response.blob_id);
+    const caseImageIds = createBlobResponses.map(response => response.id);
 
     const caseDocument = new CaseDocument(caseId, patientName, sex, dob, patientHeight,
         patientWeight, dueDate, caseImageIds);
@@ -80,14 +80,13 @@ async function createCase(internalCaseCreator, tvClient, vaultId, schemaId, crea
         tvClient.createDocument(vaultId, schemaId, caseDocument),
         tvClient.createDocument(vaultId, null, {})
     ]);
-    const caseDocId = caseDocResponse.document.id;
-    const diagnosisDocId = diagnosisDocResponse.document.id;
+    const caseDocId = caseDocResponse.id;
+    const diagnosisDocId = diagnosisDocResponse.id;
 
     const readGroup = await createReadGroup(tvClient, vaultId, caseDocId, diagnosisDocId, caseImageIds, approverId, reviewerId);
 
     const createReviewerGroupRequest = createReviewerGroup(tvClient, vaultId, caseDocId, diagnosisDocId, reviewerId);
-
-    const createInternalCaseRequest = internalCaseCreator(tvClient.apiKeyOrAccessToken, caseDocId,
+    const createInternalCaseRequest = internalCaseCreator(tvClient, caseDocId,
         diagnosisDocId, approverId, reviewerId, readGroup.id, vaultId);
 
     await Promise.all([createReviewerGroupRequest, createInternalCaseRequest]);

@@ -137,8 +137,8 @@ async function createSendgridApprovedTemplate(sendgridAPIKey, clientURL) {
 async function createCasesVault(tvClient) {
     const casesVaultName = `truediagnostics-cases-${nameNoise()}`;
     const response = await tvClient.createVault(casesVaultName);
-    console.log(chalk.green(`Created vault ${chalk.bold(casesVaultName)} with id ${chalk.bold(response.vault.id)}`));
-    return response.vault.id;
+    console.log(chalk.green(`Created vault ${chalk.bold(casesVaultName)} with id ${chalk.bold(response.id)}`));
+    return response.id;
 }
 
 async function createAdminUser(tvClient, password) {
@@ -231,8 +231,8 @@ async function createCasesSchema(tvClient, casesVaultId) {
         {index: true, name: 'dueDate', type: 'date'},
     ];
     const response = await tvClient.createSchema(casesVaultId, casesSchemaName, fields);
-    console.log(chalk.green(`Created cases schema with id ${chalk.bold(response.schema.id)}`));
-    return response.schema.id;
+    console.log(chalk.green(`Created cases schema with id ${chalk.bold(response.id)}`));
+    return response.id;
 }
 
 function randomDateInRange(start, end) {
@@ -319,11 +319,11 @@ async function createDummyCases(tvClient, vaultId, schemaId, doctorUserIds) {
         console.log(chalk.green(`Created case ${chalk.bold(caseId)}`));
     };
 
-    const createInternalCaseWithRandomTimes = async (tvAccessToken, caseDocId, diagnosisDocId,
+    const createInternalCaseWithRandomTimes = async (tvClient, caseDocId, diagnosisDocId,
                                                      approverId, reviewerId, readGroupId, vaultId) => {
-        const tvClient = new TrueVaultClient(tvAccessToken);
         const caseCreatedAtDate = randomDateInRange(getTodaysDatePlusDays(-3), today);
         const caseCreatedAtStr = caseCreatedAtDate.toISOString();
+
         await insertCaseRow(caseDocId, diagnosisDocId, approverId, reviewerId, readGroupId,
             caseCreatedAtStr);
 
@@ -348,9 +348,8 @@ async function createDummyCases(tvClient, vaultId, schemaId, doctorUserIds) {
 
     // Create at least one case per doctor that is approved for cosmetic purposes when viewing the
     // admin dashboard
-    const createApprovedInternalCase = async (tvAccessToken, caseDocId, diagnosisDocId,
+    const createApprovedInternalCase = async (tvClient, caseDocId, diagnosisDocId,
                                               approverId, reviewerId, readGroupId, vaultId) => {
-        const tvClient = new TrueVaultClient(tvAccessToken);
         const caseCreatedAtDate = randomDateInRange(getTodaysDatePlusDays(-3), today);
         const caseCreatedAtStr = caseCreatedAtDate.toISOString();
         await insertCaseRow(caseDocId, diagnosisDocId, approverId, reviewerId, readGroupId,
@@ -420,7 +419,7 @@ SENDGRID_APPROVED_TEMPLATE_ID=${sendgridApprovedTemplateId}
 async function runSetup () {
     try {
         const adminApiKey = options['admin-api-key'];
-        const adminTvClient = new TrueVaultClient(adminApiKey);
+        const adminTvClient = new TrueVaultClient({apiKey: adminApiKey});
         const password = options['password'] || 'asdf';
         const vaultId = await createCasesVault(adminTvClient);
         const schemaId = await createCasesSchema(adminTvClient, vaultId);
