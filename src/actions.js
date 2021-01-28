@@ -246,7 +246,7 @@ const caseSubmitReviewSuccess = createAction('CASE_SUBMIT_REVIEW_SUCCESS');
  * "review" the case if they were only the "approver". It adds the complexity of requiring two TrueVault Documents,
  * which some teams may skip for simplicity. We include it to show the absolute best approach from a hard-line security
  * standpoint.
- * @param tvClient TrueVaultClient for TV requests. Its apiKeyOrAccessToken is also used for Internal API authentication.
+ * @param tvClient TrueVaultClient for TV requests. Its accessToken is also used for Internal API authentication.
  * @param caseDocId The id for the case document, which will not be updated
  * @param diagnosisDocId The id for the diagnosis document, which will be updated with the summary and description
  * @param summary The terse diagnosis. Since this is free-text, it may contain PII. We store it TrueVault for safety.
@@ -260,7 +260,7 @@ export function submitReview(tvClient, caseDocId, diagnosisDocId, summary, descr
         try {
             await Promise.all([
                 tvClient.updateDocument(process.env.REACT_APP_CASES_VAULT_ID, diagnosisDocId, caseReviewDocument),
-                internalApiClient.reviewCase(tvClient.apiKeyOrAccessToken, caseDocId)
+                internalApiClient.reviewCase(tvClient.accessToken, caseDocId)
             ]);
             dispatch(caseSubmitReviewSuccess());
             dispatch(displayFlashMessage('success', 'Your review was submitted successfully'));
@@ -333,13 +333,13 @@ export function listCases(tvClient, filterType, filter, sort, page, perPage) {
         try {
             // Download PHI from TrueVault
             const result = await tvClient.searchDocuments(process.env.REACT_APP_CASES_VAULT_ID, searchOption);
-            const documents = result.data.documents.map(doc => Object.assign(
+            const documents = result.documents.map(doc => Object.assign(
                 {documentId: doc.document_id},
-                JSON.parse(atob(doc.document))
+                doc.document
             ));
 
             // Download non-PHI data (approver, reviewer) from server
-            const caseMetadataRecords = await internalApiClient.getCases(tvClient.apiKeyOrAccessToken, documents.map(d => d.documentId));
+            const caseMetadataRecords = await internalApiClient.getCases(tvClient.accessToken, documents.map(d => d.documentId));
 
             // Build a mapping of TV document ID to non-PHI data
             const documentIdToCaseMetadata = {};
@@ -355,7 +355,7 @@ export function listCases(tvClient, filterType, filter, sort, page, perPage) {
                 d.readGroupId = caseMetadata && caseMetadata.readGroupId;
             });
 
-            dispatch(caseListSuccess({cases: documents, info: result.data.info}));
+            dispatch(caseListSuccess({cases: documents, info: result.info}));
         } catch (error) {
             dispatch(caseListError(error));
         }
@@ -371,7 +371,7 @@ const doctorInboxLoadSuccess = createAction('DOCTOR_INBOX_LOAD_SUCCESS');
  * data based on non-PII criteria through your internal API first. The results will include TrueVault IDs, which you can
  * then retrieve through the TrueVault API. Finally, you can merge the data to show it to the user.
  *
- * @param tvClient TrueVaultClient for TV requests. Its apiKeyOrAccessToken is also used for Internal API authentication.
+ * @param tvClient TrueVaultClient for TV requests. Its accessToken is also used for Internal API authentication.
  * @param doctorUserId The doctor whose assigned cases we're loading
  * @returns {function(*)}
  */
@@ -381,7 +381,7 @@ export function doctorInboxLoad(tvClient, doctorUserId) {
 
         try {
             // Query non-PHI data from server
-            const cases = await internalApiClient.listMyCases(tvClient.apiKeyOrAccessToken);
+            const cases = await internalApiClient.listMyCases(tvClient.accessToken);
 
             const tvDocIds = cases.map(c => c.caseDocId);
             const casesToApprove = cases.filter(c => c.approverId === doctorUserId);
@@ -416,7 +416,7 @@ const assignCaseToNewPatientSuccess = createAction('ASSIGN_CASE_TO_NEW_PATIENT_S
  *  sample code, but it should be clear how you could search for patient users first if you wanted to chose an existing
  *  patient instead.
  *
- * @param tvClient TrueVaultClient for TV requests. Its apiKeyOrAccessToken is also used for Internal API authentication.
+ * @param tvClient TrueVaultClient for TV requests. Its accessToken is also used for Internal API authentication.
  * @param caseDocId The case that this patient will be added to
  * @param readGroupId The id for the TrueVault Group that allows reading this case
  * @param patientEmail The email address for the patient, to send an invite
@@ -439,7 +439,7 @@ export function assignCaseToNewPatient(tvClient, caseDocId, readGroupId, patient
 
             const addUserToCaseReadGroupRequest = tvClient.addUsersToGroup(readGroupId, [user.id]);
 
-            const associateCaseWithPatientRequest = internalApiClient.associateCaseWithPatient(tvClient.apiKeyOrAccessToken, caseDocId, user.id, user.api_key);
+            const associateCaseWithPatientRequest = internalApiClient.associateCaseWithPatient(tvClient.accessToken, caseDocId, user.id, user.api_key);
 
             await Promise.all([addUserToPatientsGroupRequest, addUserToCaseReadGroupRequest, associateCaseWithPatientRequest]);
 

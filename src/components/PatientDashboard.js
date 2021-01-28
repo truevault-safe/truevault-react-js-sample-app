@@ -10,7 +10,7 @@ import CaseStatus from "./CaseStatus";
 
 class PatientDashboard extends Component {
     async componentWillMount() {
-        const caseMetadataRequest = internalApiClient.getPatientCase(this.props.tvClient.apiKeyOrAccessToken);
+        const caseMetadataRequest = internalApiClient.getPatientCase(this.props.tvClient.accessToken);
 
         this.props.viewCase(this.props.tvClient, caseMetadataRequest);
     }
