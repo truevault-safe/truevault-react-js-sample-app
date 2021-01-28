@@ -103,6 +103,7 @@ class InternalApiClient {
     }
 
     async getAdminDashboardStats(tvAccessToken) {
+        console.log("admin-stats tvAccessToken", tvAccessToken);
         const response = await fetch(`${this.urlPrefix}/api/dashboard/stats`, {
             headers: this.headers(tvAccessToken)
         });

@@ -11,7 +11,7 @@ import CaseStatus from "./CaseStatus";
 
 class DoctorCaseView extends Component {
     componentWillMount() {
-        const getCaseMetadataRequest = internalApiClient.getCase(this.props.tvClient.apiKeyOrAccessToken, this.props.routeParams.caseId);
+        const getCaseMetadataRequest = internalApiClient.getCase(this.props.tvClient.accessToken, this.props.routeParams.caseId);
 
         this.props.viewCase(this.props.tvClient, getCaseMetadataRequest);
     }
@@ -26,7 +26,7 @@ class DoctorCaseView extends Component {
     submitApproval(e) {
         e.preventDefault();
 
-        this.props.submitApproval(this.props.tvClient.apiKeyOrAccessToken, this.props.routeParams.caseId);
+        this.props.submitApproval(this.props.tvClient.accessToken, this.props.routeParams.caseId);
     }
 
     caseUpdateForm(submitFunction, submitting, formDisabled, buttonLabel) {

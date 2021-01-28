@@ -29,8 +29,12 @@ class AdminDashboard extends Component {
 }
 
 const mapStateToProps = (state) => {
+    console.log("admin dashboard mapStateToProps state.login.tvclient", state.login.tvClient);
+    console.log("tvClient.accessToken", state.login.tvClient.accessToken);
+    console.log("tvClient.accessToken", state.login.tvClient.accessToken);
+    
     return {
-        accessToken: state.login.tvClient.apiKeyOrAccessToken,
+        accessToken: state.login.tvClient.accessToken,
         stats: state.statsView.stats,
         statsLoading: state.statsView.loading,
         statsError: state.statsView.error
