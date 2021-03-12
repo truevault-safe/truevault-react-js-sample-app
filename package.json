@@ -63,7 +63,7 @@
     "postcss-loader": "1.2.2",
     "promise": "8.0.2",
     "randomstring": "^1.1.5",
-    "react-dev-utils": "^0.5.2",
+    "react-dev-utils": "^11.0.4",
     "sass-loader": "^7.1.0",
     "style-loader": "0.23.1",
     "url-loader": "0.5.7",
